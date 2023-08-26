@@ -56,6 +56,18 @@ body {
   padding: 0;
 }
 
+.tatis {
+  margin-bottom: 10px;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+ol {
+  padding-left: 15px;
+}
+
 .square {
   margin: 2px;
   background: #fff;

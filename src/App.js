@@ -62,6 +62,7 @@ export function Board({ xIsNext, squares, onPlay, coordinates }) {
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [coordinates, setCoordinates] = useState([]);
+  const [coordinatesHistory, setCoordinatesHistory] = useState([[]]);
   const [currentMove, setCurrentMove] = useState(0);
   const [sort, setSort] = useState("asc");
   const currentSquares = history[currentMove];
@@ -69,38 +70,39 @@ export default function Game() {
 
   const handlePlay = (nextSquares, coordObj) => {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    const nextCoordinates = [
+      ...coordinates.slice(0, currentMove + 1),
+      coordObj,
+    ];
+    setCoordinatesHistory([...coordinatesHistory, nextCoordinates]);
     setCurrentMove(nextHistory.length - 1);
     setHistory(nextHistory);
-    setCoordinates([...coordinates.slice(0, currentMove + 1), coordObj]);
+    setCoordinates(nextCoordinates);
   };
 
-  const jumpTo = (nextMove) => setCurrentMove(nextMove);
+  const jumpTo = (nextMove) => {
+    setCurrentMove(nextMove);
+    setCoordinates(coordinatesHistory[nextMove]);
+  };
 
   const handleSorting = () => {
     setSort(sort === "asc" ? "desc" : "asc");
   };
 
   const calcValue = (val) => {
-    switch (val) {
-      case 1:
-        return { row: 1, col: 2 };
-      case 2:
-        return { row: 1, col: 3 };
-      case 3:
-        return { row: 2, col: 1 };
-      case 4:
-        return { row: 2, col: 2 };
-      case 5:
-        return { row: 2, col: 3 };
-      case 6:
-        return { row: 3, col: 1 };
-      case 7:
-        return { row: 3, col: 2 };
-      case 8:
-        return { row: 3, col: 3 };
-      default:
-        return { row: 1, col: 1 };
-    }
+    const positions = [
+      { row: 1, col: 1 },
+      { row: 1, col: 2 },
+      { row: 1, col: 3 },
+      { row: 2, col: 1 },
+      { row: 2, col: 2 },
+      { row: 2, col: 3 },
+      { row: 3, col: 1 },
+      { row: 3, col: 2 },
+      { row: 3, col: 3 },
+    ];
+
+    return positions[val];
   };
 
   const moves = history.map((squares, move) => {
@@ -111,12 +113,14 @@ export default function Game() {
     } else if (move === currentMove) {
       description = "You are at move # " + (move + 1);
     } else {
-      description =
-        "Go to move # " +
-        (move + 1) +
-        ` | VAL: ${coordinates[move]?.label} | ROW: ${
-          calcValue(coordinates[move]?.value)?.row
-        } | COL: ${calcValue(coordinates[move]?.value)?.col}`;
+      description = "Go to move # " + (move + 1);
+      if (coordinates[move]?.label) {
+        description =
+          description +
+          ` | VAL: ${coordinates[move]?.label} | ROW: ${
+            calcValue(coordinates[move]?.value)?.row
+          } | COL: ${calcValue(coordinates[move]?.value)?.col}`;
+      }
     }
     return (
       <li key={move}>
